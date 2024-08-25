@@ -1,7 +1,7 @@
 import js from '@eslint/js';
 import ts from 'typescript-eslint';
 import globals from 'globals';
-import prettier from 'eslint-config-prettier';
+import prettier from 'eslint-plugin-prettier/recommended';
 
 export default [
   {
