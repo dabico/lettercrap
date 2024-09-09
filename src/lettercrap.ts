@@ -30,8 +30,8 @@ const config: Config = {
 const style: Partial<CSSStyleDeclaration> = {
   padding: '0',
   fontFamily: 'monospace',
-  fontSize: '10px',
-  lineHeight: '10px',
+  fontSize: 'clamp(2px, 1vw, 1em)',
+  lineHeight: '100%',
   whiteSpace: 'pre',
   overflow: 'hidden',
 };
@@ -301,9 +301,7 @@ function render(element: HTMLDivElement, image: HTMLImageElement) {
   }
 
   function write() {
-    const width = element.clientWidth;
-    const height = element.clientHeight;
-    text = getTextContentWithImageAtSize(image, width, height, text, words, letters);
+    text = getTextContentWithImageAtSize(image, element, text, words, letters);
     element.textContent = text;
     return write;
   }
@@ -311,15 +309,18 @@ function render(element: HTMLDivElement, image: HTMLImageElement) {
 
 function getTextContentWithImageAtSize(
   image: HTMLImageElement,
-  width: number,
-  height: number,
+  element: HTMLDivElement,
   existingText: string | undefined,
   words: string[],
   letters: string
 ) {
   existingText = existingText?.replace(/\r?\n|\r/g, '');
-  const char_width = 6;
-  const char_height = 10;
+  const ratio = 1.61;
+  const char_height = +getComputedStyle(element).fontSize.toString().slice(0, -2);
+  const char_width = char_height / ratio;
+  const parent_element_width = +getComputedStyle(element.parentElement!).width.toString().slice(0, -2);
+  const factor = window.innerWidth / parent_element_width;
+
   const shouldReplaceWord = () => Math.random() < 0.05;
   const shouldReplaceExistingText = () => !existingText || Math.random() < 0.1;
 
@@ -328,6 +329,7 @@ function getTextContentWithImageAtSize(
   }
 
   const canvas = document.createElement('canvas');
+  const { clientWidth: width, clientHeight: height } = element;
   canvas.width = width / char_width;
   canvas.height = height / char_height;
   const context = canvas.getContext('2d')!;
